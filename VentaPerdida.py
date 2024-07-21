@@ -4,6 +4,7 @@ import plotly.graph_objects as go
 from datetime import datetime
 from io import BytesIO
 import hashlib
+import os
 
 # Configuración de la página
 st.set_page_config(page_title="Reporte de Venta Pérdida Cigarros y RRPS", page_icon="📊", layout="wide", initial_sidebar_state="expanded")
@@ -291,4 +292,5 @@ if data is not None:
     st.plotly_chart(plot_venta_perdida_mercado(filtered_data, view), use_container_width=True)
 else:
     st.warning("No se encontraron datos en la carpeta especificada.")
+
 
