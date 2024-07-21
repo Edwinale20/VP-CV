@@ -2,8 +2,7 @@ import pandas as pd
 import streamlit as st
 import plotly.graph_objects as go
 from datetime import datetime
-from io import StringIO, BytesIO
-import requests
+from io import BytesIO
 import hashlib
 
 # Configuración de la página
@@ -17,52 +16,29 @@ st.markdown("En esta página podrás visualizar la venta pérdida día con día,
 folder_path = "Base."
 venta_pr_path = "Base./Venta PR.xlsx"
 
-# Function to fetch contents from GitHub
-def fetch_contents(repo_owner, repo_name, path=""):
-    url = f"https://api.github.com/repos/{repo_owner}/{repo_name}/contents/{path}"
-    headers = {
-        "Authorization": f"token {github_token}",
-        "Accept": "application/vnd.github.v3+json"
-    }
-    response = requests.get(url, headers=headers)
-    response.raise_for_status()
-    return response.json()
-
-# Function to fetch CSV files from GitHub
-def fetch_csv_files(repo_owner, repo_name, path=""):
-    contents = fetch_contents(repo_owner, repo_name, path)
-    return [file for file in contents if file["name"].endswith(".csv")]
-
-# Function to read a CSV file from GitHub
-def read_csv_from_github(repo_owner, repo_name, file_path):
-    url = f"https://api.github.com/repos/{repo_owner}/{repo_name}/contents/{file_path}"
-    headers = {
-        "Authorization": f"token {github_token}",
-        "Accept": "application/vnd.github.v3.raw"
-    }
-    response = requests.get(url, headers=headers)
-    response.raise_for_status()
-    return pd.read_csv(StringIO(response.text), encoding='ISO-8859-1')
+# Function to read a CSV file from the local folder
+def read_csv_from_local(file_path):
+    return pd.read_csv(file_path, encoding='ISO-8859-1')
 
 # Function to get the current hash of the files in the folder
 def get_files_hash(files):
-    files_str = ''.join(sorted([file['name'] for file in files]))
+    files_str = ''.join(sorted(files))
     return hashlib.md5(files_str.encode()).hexdigest()
 
 # Function to process CSV files
 @st.cache_data
-def process_data(repo_owner, repo_name, folder_path, files_hash):
-    all_files = fetch_csv_files(repo_owner, repo_name, folder_path)
+def process_data(folder_path, files_hash):
+    all_files = [f for f in os.listdir(folder_path) if f.endswith('.csv')]
     all_data = []
     for file in all_files:
         try:
-            date_str = file['name'].split('.')[0]
+            date_str = file.split('.')[0]
             date = datetime.strptime(date_str, '%d%m%Y')
-            df = read_csv_from_github(repo_owner, repo_name, f"{folder_path}/{file['name']}")
+            df = read_csv_from_local(f"{folder_path}/{file}")
             df['Fecha'] = date
             all_data.append(df)
         except Exception as e:
-            st.write(f"Error leyendo el archivo {file['name']}: {e}")
+            st.write(f"Error leyendo el archivo {file}: {e}")
     if not all_data:
         return None
     data = pd.concat(all_data)
@@ -85,15 +61,7 @@ def process_data(repo_owner, repo_name, folder_path, files_hash):
 
 # Function to process Venta PR file
 def load_venta_pr(file_path):
-    url = f"https://api.github.com/repos/{repo_owner}/{repo_name}/contents/{file_path}"
-    headers = {
-        "Authorization": f"token {github_token}",
-        "Accept": "application/vnd.github.v3.raw"
-    }
-    response = requests.get(url, headers=headers)
-    response.raise_for_status()
-    excel_content = BytesIO(response.content)
-    df = pd.read_excel(excel_content)
+    df = pd.read_excel(file_path)
     df['Día Contable'] = pd.to_datetime(df['Día Contable'], format='%d/%m/%Y')
     df['Semana'] = df['Día Contable'].dt.isocalendar().week
     return df
@@ -256,11 +224,11 @@ def plot_venta_perdida_mercado(data, view):
     return fig
 
 # Fetch all CSV files and their hash
-all_files = fetch_csv_files(repo_owner, repo_name, folder_path)
+all_files = [f for f in os.listdir(folder_path) if f.endswith('.csv')]
 files_hash = get_files_hash(all_files)
 
 # Procesar archivos en la carpeta especificada
-data = process_data(repo_owner, repo_name, folder_path, files_hash)
+data = process_data(folder_path, files_hash)
 
 # Show dashboard if data is available
 if data is not None:
@@ -323,3 +291,4 @@ if data is not None:
     st.plotly_chart(plot_venta_perdida_mercado(filtered_data, view), use_container_width=True)
 else:
     st.warning("No se encontraron datos en la carpeta especificada.")
+
