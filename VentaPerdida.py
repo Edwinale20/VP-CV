@@ -13,20 +13,9 @@ st.set_page_config(page_title="Reporte de Venta Pérdida Cigarros y RRPS", page_
 st.title("📊 Reporte de Venta Perdida Cigarros y RRPS")
 st.markdown("En esta página podrás visualizar la venta pérdida día con día, por plaza, división, proveedor y otros datos que desees. Esto con el fin de dar acción y reducir la Venta pérdida")
 
-# Fetch GitHub token from secrets
-try:
-    github_token = st.secrets["github"]["token"]
-except KeyError:
-    st.error("GitHub token not found. Please add it to the secrets.")
-    st.stop()
-
-# GitHub repository details
-repo_owner = "Edwinale20"
-repo_name = "317B"
-
 # File paths
-folder_path = "venta"
-venta_pr_path = "venta/Venta PR.xlsx"
+folder_path = "Base."
+venta_pr_path = "Base./Venta PR.xlsx"
 
 # Function to fetch contents from GitHub
 def fetch_contents(repo_owner, repo_name, path=""):
