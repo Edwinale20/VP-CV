@@ -48,12 +48,12 @@ def process_data(folder_path, files_hash):
     data.loc[data['DESC_ARTICULO'].str.contains('VUSE', case=False, na=False), 'CATEGORIA'] = '062 RRPs (Vapor y tabaco calentado)'
     # Renombrar proveedores y eliminar proveedor dummy
     proveedores_renombrados = {
-        "1822 PHILIP MORRIS MEXICO, S.A. DE C.V.": "PMI",
-        "1852 BRITISH AMERICAN TOBACCO MEXICO COMERCIAL, S.A. DE C.V.": "BAT",
-        "6247 MAS BODEGA Y LOGISTICA, S.A. DE C.V.": "JTI",
-        "21864 ARTICUN DISTRIBUIDORA S.A. DE C.V.": "Articun",
-        "2216 NUEVA DISTABAC, S.A. DE C.V.": "Nueva Distabac",
-        "8976 DRUGS EXPRESS, S.A DE C.V.": "Drugs Express",
+        "1822 PHILIP MORRIS MEXICO, S.A. DE C.V.": "Proveedor 1",
+        "1852 BRITISH AMERICAN TOBACCO MEXICO COMERCIAL, S.A. DE C.V.": "Proveedor 2",
+        "6247 MAS BODEGA Y LOGISTICA, S.A. DE C.V.": "Proveedor 3",
+        "21864 ARTICUN DISTRIBUIDORA S.A. DE C.V.": "Proveedor 4",
+        "2216 NUEVA DISTABAC, S.A. DE C.V.": "Proveedor 5",
+        "8976 DRUGS EXPRESS, S.A DE C.V.": "Proveedor 6",
         "1 PROVEEDOR DUMMY MIGRACION": "Eliminar"
     }
     data['PROVEEDOR'] = data['PROVEEDOR'].replace(proveedores_renombrados)
